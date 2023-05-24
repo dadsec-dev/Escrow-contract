@@ -37,7 +37,7 @@ contract Escrow is ReentrancyGuard {
     PaymentDetails[] public Orders;
 
 
-    function Deposit(address _token, uint256 _amount) public returns (uint256) {
+    function Deposit(address _token, uint256 _amount) public {
         require(msg.sender != address(0), "Must be an Address");
         uint256 fee = (_amount * feePercentage) / 100;
         uint256 totalAmount = _amount + fee;
@@ -60,11 +60,13 @@ contract Escrow is ReentrancyGuard {
 
     }
 
-    function refundCustomer(address _customer, uint256 _refundAmount, address _token) public onlyOwner() {
+    function refundCustomer(address _customer,  address _token) public onlyOwner() {
         require(_customer != address(0), "custemer can't be address(0)");
         require(_token != address(0), "invalid token");
 
-        IERC20(_token).transferFrom(companyAddress, _customer, _refundAmount);
+        PaymentDetails storage paymt = individualPayments[_customer];
+        uint256 amountToRefund = paymt.Amount;
+        IERC20(_token).transferFrom(companyAddress, _customer, amountToRefund);
     }
 
 
